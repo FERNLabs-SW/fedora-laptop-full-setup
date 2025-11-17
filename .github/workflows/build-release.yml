@@ -3,27 +3,42 @@ name: Build and Release Fedora Laptop Setup
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*.*.*'  # Trigger only on version tags like v1.0.0
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Change this to a Fedora-based container if possible
+    
+    # Define the container image as a Fedora environment
     container:
-      image: fedora:43
-
+      image: fedora:latest
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Install Fedora tools
         run: |
-          dnf -y update
-          dnf -y install tar gzip
+          # Install required tools to build RPM package
+          dnf -y install rpm-build make gcc
 
-      - name: Package the script
+      - name: Build RPM package
         run: |
-          mkdir -p release
-          tar -czvf release/fedora-laptop-full-setup.tar.gz fedora-laptop-full-setup.sh
+          # Create the RPM build directories
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+
+          # Copy the script and spec file to the proper locations
+          cp fedora-laptop-full-setup.sh ~/rpmbuild/SOURCES/
+          cp SPECS/fedora-laptop-full-setup.spec ~/rpmbuild/SPECS/
+
+          # Build the RPM package
+          rpmbuild -ba ~/rpmbuild/SPECS/fedora-laptop-full-setup.spec
+
+      - name: Upload RPM package as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: fedora-laptop-full-setup.rpm
+          path: ~/rpmbuild/RPMS/x86_64/*.rpm  # Adjust this if your architecture is different
 
       - name: Create GitHub Release
         id: create_release
@@ -32,5 +47,5 @@ jobs:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: Automated release for Fedora Laptop Full Setup Script
-          artifacts: release/fedora-laptop-full-setup.tar.gz
-          token: ${{ secrets.GH_PAT }}
+          artifacts: ~/rpmbuild/RPMS/x86_64/*.rpm
+          token: ${{ secrets.GITHUB_TOKEN }}
