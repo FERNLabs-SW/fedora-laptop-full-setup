@@ -7,6 +7,8 @@ on:
 
 jobs:
   build-and-release:
+    runs-on: ubuntu-latest  # Dummy VM required, since we are using a container
+    
     container:
       image: fedora:latest  # Use Fedora container for building RPM package
 
@@ -33,7 +35,7 @@ jobs:
           rpmbuild -ba ~/rpmbuild/SPECS/fedora-laptop-full-setup.spec
 
       - name: Upload RPM package as artifact
-        uses: actions/upload-artifact@v4 # Update to v4
+        uses: actions/upload-artifact@v4  # Update to v4
         with:
           name: fedora-laptop-full-setup.rpm
           path: ~/rpmbuild/RPMS/x86_64/*.rpm  # Adjust this if your architecture is different
@@ -45,5 +47,5 @@ jobs:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: Automated release for Fedora Laptop Full Setup Script
-          artifact: ~/rpmbuild/RPMS/x86_64/*.rpm  # Adjust this path to your RPM file location
-
+          artifacts: ~/rpmbuild/RPMS/x86_64/*.rpm
+          token: ${{ secrets.GITHUB_TOKEN }}
