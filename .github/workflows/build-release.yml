@@ -1,0 +1,29 @@
+name: Build and Release Fedora Laptop Setup
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger only on version tags like v1.0.0
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Package script
+      run: |
+        mkdir -p release
+        tar -czvf release/fedora-laptop-full-setup.tar.gz fedora-laptop-full-setup.sh
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
+        body: |
+          Automated release for Fedora Laptop Full Setup Script
+        files: release/fedora-laptop-full-setup.tar.gz
