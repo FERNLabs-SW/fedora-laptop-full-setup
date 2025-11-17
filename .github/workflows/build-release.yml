@@ -7,12 +7,9 @@ on:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest  # Change this to a Fedora-based container if possible
-    
-    # Define the container image as a Fedora environment
     container:
-      image: fedora:latest
-    
+      image: fedora:latest  # Use Fedora container for building RPM package
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -20,6 +17,7 @@ jobs:
       - name: Install Fedora tools
         run: |
           # Install required tools to build RPM package
+          dnf -y update
           dnf -y install rpm-build make gcc
 
       - name: Build RPM package
@@ -47,5 +45,5 @@ jobs:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: Automated release for Fedora Laptop Full Setup Script
-          artifacts: ~/rpmbuild/RPMS/x86_64/*.rpm
-          token: ${{ secrets.GITHUB_TOKEN }}
+          artifact: ~/rpmbuild/RPMS/x86_64/*.rpm  # Adjust this path to your RPM file location
+
