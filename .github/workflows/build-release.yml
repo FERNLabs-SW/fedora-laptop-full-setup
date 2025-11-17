@@ -3,7 +3,7 @@ name: Build and Release Fedora Laptop Setup
 on:
   push:
     tags:
-      - 'v*.*.*'  # Trigger only on version tags like v1.0.0
+      - 'v*.*.*'
 
 jobs:
   build-and-release:
@@ -31,6 +31,6 @@ jobs:
         with:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body: |
-            Automated release for Fedora Laptop Full Setup Script
-          files: release/fedora-laptop-full-setup.tar.gz
+          body: Automated release for Fedora Laptop Full Setup Script
+          artifacts: release/fedora-laptop-full-setup.tar.gz
+          token: ${{ secrets.GITHUB_TOKEN }}
