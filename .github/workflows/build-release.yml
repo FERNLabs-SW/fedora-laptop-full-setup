@@ -8,22 +8,29 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    container:
+      image: fedora:43
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Package script
-      run: |
-        mkdir -p release
-        tar -czvf release/fedora-laptop-full-setup.tar.gz fedora-laptop-full-setup.sh
+      - name: Install Fedora tools
+        run: |
+          dnf -y update
+          dnf -y install tar gzip
 
-    - name: Create GitHub Release
-      id: create_release
-      uses: ncipollo/release-action@v1
-      with:
-        tag: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
-        body: |
-          Automated release for Fedora Laptop Full Setup Script
-        files: release/fedora-laptop-full-setup.tar.gz
+      - name: Package the script
+        run: |
+          mkdir -p release
+          tar -czvf release/fedora-laptop-full-setup.tar.gz fedora-laptop-full-setup.sh
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Automated release for Fedora Laptop Full Setup Script
+          files: release/fedora-laptop-full-setup.tar.gz
