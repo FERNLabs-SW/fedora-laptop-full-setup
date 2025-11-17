@@ -1,6 +1,5 @@
 name: Build and Release Fedora Laptop Setup
 
-# Trigger workflow only on version tags like v1.0.0
 on:
   push:
     tags:
@@ -8,29 +7,24 @@ on:
 
 jobs:
   build-and-release:
-    # Use a Fedora container for the job
     runs-on: ubuntu-latest
     container:
       image: fedora:43
 
     steps:
-      # 1️⃣ Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Install Fedora tools needed for packaging
       - name: Install Fedora tools
         run: |
           dnf -y update
           dnf -y install tar gzip
 
-      # 3️⃣ Package the script
       - name: Package the script
         run: |
           mkdir -p release
           tar -czvf release/fedora-laptop-full-setup.tar.gz fedora-laptop-full-setup.sh
 
-      # 4️⃣ Create GitHub Release using a PAT
       - name: Create GitHub Release
         id: create_release
         uses: ncipollo/release-action@v1
