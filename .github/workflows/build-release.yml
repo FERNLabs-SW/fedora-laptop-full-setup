@@ -61,3 +61,4 @@ jobs:
           body: Automated release for Fedora Laptop Full Setup Script
           artifacts: release/*.rpm
           token: ${{ secrets.GITHUB_TOKEN }}
+

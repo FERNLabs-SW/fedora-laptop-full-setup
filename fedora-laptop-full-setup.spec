@@ -31,3 +31,7 @@ install -m 0755 fedora-laptop-full-setup.sh %{buildroot}/usr/local/bin/fedora-la
 * Mon Nov 18 2025 Rich FERNLabs-SW <fernlabs@icloud.com> - 1.0.5-1
 - Added SPEC file to repo root
 - Updated build structure to be self-contained
+<<<<<<< HEAD
+=======
+
+>>>>>>> update-self-contained-build
