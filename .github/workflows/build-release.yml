@@ -13,7 +13,7 @@ jobs:
 
     steps:
 
-      # Checkout
+      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -24,33 +24,35 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # Install build tools
+      # Install RPM build tools
       - name: Install RPM tools
         run: |
           dnf -y update
           dnf -y install rpm-build rpmdevtools tar gzip
 
-      # Prepare RPM build directories
-      - name: Prepare RPM build directories
-        run: mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+      # Prepare rpmbuild directories inside repo
+      - name: Setup rpmbuild dirs
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
-      # Create source tarball that the .spec expects
+      # Create source tarball inside rpmbuild/SOURCES
       - name: Create source tarball
         run: |
-          git archive \
-            --format=tar.gz \
-            --prefix=fedora-laptop-full-setup-${GITHUB_REF_NAME#v}/ \
-            -o ~/rpmbuild/SOURCES/fedora-laptop-full-setup-${GITHUB_REF_NAME#v}.tar.gz HEAD
+          tar -czf $GITHUB_WORKSPACE/rpmbuild/SOURCES/fedora-laptop-full-setup-${{ steps.get_version.outputs.version }}.tar.gz fedora-laptop-full-setup.sh
 
-      # Copy spec file and build RPM
+      # Copy spec file into rpmbuild/SPECS
+      - name: Copy SPEC file
+        run: |
+          cp fedora-laptop-full-setup.spec $GITHUB_WORKSPACE/rpmbuild/SPECS/
+
+      # Build the RPM
       - name: Build RPM
         run: |
-          cp fedora-laptop-full-setup.spec ~/rpmbuild/SPECS/
-          rpmbuild -ba ~/rpmbuild/SPECS/fedora-laptop-full-setup.spec
+          rpmbuild --define "_topdir $GITHUB_WORKSPACE/rpmbuild" -ba $GITHUB_WORKSPACE/rpmbuild/SPECS/fedora-laptop-full-setup.spec
           mkdir -p release
-          cp ~/rpmbuild/RPMS/noarch/*.rpm release/
+          cp $GITHUB_WORKSPACE/rpmbuild/RPMS/noarch/*.rpm release/
 
-      # Create Release + upload RPMs
+      # Create GitHub Release + upload RPMs
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
