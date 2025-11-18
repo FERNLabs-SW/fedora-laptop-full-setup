@@ -15,7 +15,7 @@ Requires:       bash
 Automated Fedora laptop setup script that installs drivers, firmware, and utilities.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}
 
 %build
 # Nothing to build; this is just a script
@@ -31,7 +31,3 @@ install -m 0755 fedora-laptop-full-setup.sh %{buildroot}/usr/local/bin/fedora-la
 * Mon Nov 18 2025 Rich FERNLabs-SW <fernlabs@icloud.com> - 1.0.5-1
 - Added SPEC file to repo root
 - Updated build structure to be self-contained
-<<<<<<< HEAD
-=======
-
->>>>>>> update-self-contained-build
