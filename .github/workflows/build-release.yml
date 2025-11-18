@@ -33,8 +33,11 @@ jobs:
       # Create source tarball that the .spec expects
       - name: Create source tarball
         run: |
-          mkdir -p $HOME/rpmbuild/SOURCES
-          tar -czf $HOME/rpmbuild/SOURCES/fedora-laptop-full-setup-${{ steps.get_version.outputs.version }}.tar.gz fedora-laptop-full-setup.sh
+          mkdir -p ~/rpmbuild/SOURCES
+          git archive \  
+            --format=tar.gz \
+            --prefix=fedora-laptop-full-setup-${GITHUB_REF_NAME}/ \
+            -o ~/rpmbuild/SOURCES/fedora-laptop-full-setup-${GITHUB_REF_NAME#v}.tar.gz HEAD
 
       # Build RPM
       - name: Build RPM
