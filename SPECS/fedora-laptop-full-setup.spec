@@ -28,5 +28,5 @@ install -m 0755 fedora-laptop-full-setup.sh %{buildroot}/usr/local/bin/fedora-la
 /usr/local/bin/fedora-laptop-full-setup
 
 %changelog
-* Mon Nov 18 2025 Rich FERNLabs-SW <fernlabs@icloud.com> - 1.0.1-1
+* Mon Nov 18 2024 Rich FERNLabs-SW <fernlabs@icloud.com> - 1.0.1-1
 - Initial release
