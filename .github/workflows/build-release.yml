@@ -1,44 +1,37 @@
-name: Build and Release Fedora Laptop Setup
+name: Build and Release Fedora Script RPM
 
 on:
   push:
     tags:
-      - 'v*.*.*'  # Trigger only on version tags like v1.0.0
+      - 'v*.*.*'
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-latest  # Dummy VM required, since we are using a container
-    
+    runs-on: ubuntu-latest
     container:
-      image: fedora:latest  # Use Fedora container for building RPM package
+      image: fedora:43
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Fedora tools
+      - name: Install RPM tools
         run: |
-          # Install required tools to build RPM package
           dnf -y update
-          dnf -y install rpm-build make gcc
+          dnf -y install rpm-build rpmdevtools tar gzip
 
-      - name: Build RPM package
+      - name: Prepare tarball
         run: |
-          # Create the RPM build directories
+          mkdir -p release
+          tar -czvf release/fedora-laptop-full-setup-${{ github.ref_name }}.tar.gz fedora-laptop-full-setup.sh
+
+      - name: Build RPM
+        run: |
           mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-
-          # Copy the script and spec file to the proper locations
-          cp fedora-laptop-full-setup.sh ~/rpmbuild/SOURCES/
-          cp SPECS/fedora-laptop-full-setup.spec ~/rpmbuild/SPECS/
-
-          # Build the RPM package
+          cp release/fedora-laptop-full-setup-${{ github.ref_name }}.tar.gz ~/rpmbuild/SOURCES/
+          cp fedora-laptop-full-setup.spec ~/rpmbuild/SPECS/
           rpmbuild -ba ~/rpmbuild/SPECS/fedora-laptop-full-setup.spec
-
-      - name: Upload RPM package as artifact
-        uses: actions/upload-artifact@v4  # Update to v4
-        with:
-          name: fedora-laptop-full-setup.rpm
-          path: ~/rpmbuild/RPMS/x86_64/*.rpm  # Adjust this if your architecture is different
+          cp ~/rpmbuild/RPMS/noarch/*.rpm release/
 
       - name: Create GitHub Release
         id: create_release
@@ -47,5 +40,5 @@ jobs:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: Automated release for Fedora Laptop Full Setup Script
-          artifacts: ~/rpmbuild/RPMS/x86_64/*.rpm
+          artifacts: release/*.rpm
           token: ${{ secrets.GITHUB_TOKEN }}
