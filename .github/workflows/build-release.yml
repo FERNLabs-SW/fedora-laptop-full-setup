@@ -38,17 +38,20 @@ jobs:
       # Create source tarball inside rpmbuild/SOURCES
       - name: Create source tarball
         run: |
-          tar -czf $GITHUB_WORKSPACE/rpmbuild/SOURCES/fedora-laptop-full-setup-${{ steps.get_version.outputs.version }}.tar.gz fedora-laptop-full-setup.sh
+          tar -czf $GITHUB_WORKSPACE/rpmbuild/SOURCES/fedora-laptop-full-setup-${{ steps.get_version.outputs.version }}.tar.gz \
+              --transform "s|^|fedora-laptop-full-setup-${{ steps.get_version.outputs.version }}/|" \
+              fedora-laptop-full-setup.sh
 
-      # Copy spec file into rpmbuild/SPECS
+      # Copy SPEC file into rpmbuild/SPECS
       - name: Copy SPEC file
         run: |
           cp fedora-laptop-full-setup.spec $GITHUB_WORKSPACE/rpmbuild/SPECS/
 
-      # Build the RPM
+      # Build the RPM inside repo
       - name: Build RPM
         run: |
-          rpmbuild --define "_topdir $GITHUB_WORKSPACE/rpmbuild" -ba $GITHUB_WORKSPACE/rpmbuild/SPECS/fedora-laptop-full-setup.spec
+          rpmbuild --define "_topdir $GITHUB_WORKSPACE/rpmbuild" \
+                   -ba $GITHUB_WORKSPACE/rpmbuild/SPECS/fedora-laptop-full-setup.spec
           mkdir -p release
           cp $GITHUB_WORKSPACE/rpmbuild/RPMS/noarch/*.rpm release/
 
@@ -61,4 +64,3 @@ jobs:
           body: Automated release for Fedora Laptop Full Setup Script
           artifacts: release/*.rpm
           token: ${{ secrets.GITHUB_TOKEN }}
-
